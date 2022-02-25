@@ -1,10 +1,3 @@
-PlaceID = game.PlaceId
-if PlaceID == 7655489843 then
-    
-else
-    game.Players.LocalPlayer:Kick("บินไปนอกโลกไป")
-end
-    
 spawn(function()
         while wait(10) do
             pcall(function()
