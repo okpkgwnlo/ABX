@@ -1,14 +1,3 @@
-spawn(function()
-        while wait(10) do
-            pcall(function()
-                for i,v in pairs(game:GetService("CoreGui"):GetDescendants()) do
-                    if v.Name == "ScriptEditor" then
-                        game.Players.LocalPlayer:Kick("\nDark Dex ;-;\nเหมือนหล่อเหมือนเจ๋ง โธ่เอ้ยย!")
-                    end
-                end
-            end)
-        end
-    end)
 
 	do  local ui =  game:GetService("CoreGui"):FindFirstChild("redui")  if ui then ui:Destroy() end end
 
