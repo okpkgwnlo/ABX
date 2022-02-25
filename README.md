@@ -1,20 +1,4 @@
 
-if not game:IsLoaded() then 
-    repeat game.Loaded:wait(0.2) 
-        wait(10)
-    until game:IsLoaded() 
-end
-    spawn(function()
-        while wait(10) do
-            pcall(function()
-                for i,v in pairs(game:GetService("CoreGui"):GetDescendants()) do
-                    if v.Name == "ScriptEditor" then
-                        game.Players.LocalPlayer:Kick("\nDark Dex ;-;\nเหมือนหล่อเหมือนเจ๋ง โธ่เอ้ยย!")
-                    end
-                end
-            end)
-        end
-    end)
 	do  local ui =  game:GetService("CoreGui"):FindFirstChild("redui")  if ui then ui:Destroy() end end
 
 	local UserInputService = game:GetService("UserInputService")
@@ -2681,11 +2665,7 @@ end
 						TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 						{Size = UDim2.new(0, 213, 0, 30)} -- UDim2.new(0, 128, 0, 25)
 					):Play()
-					TweenService:Create(
-						FrameBox,
-						TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-						{BackgroundColor3 = Color3.fromRGB(0,250,154)} -- UDim2.new(0, 128, 0, 25)
-					):Play()
+					
 					TweenService:Create(
 						TextFrame2,
 						TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
@@ -3692,80 +3672,120 @@ function Next()
     Duration = 2; -- how long the notification should in secounds
     })
 end
------------------------------------------ Gui Go
-	local Window = create:Win("L I V E R - H U B    |    L A S T - P I R A T E ")
-	
-	local Tap2 = Window:Taps("Main")
-    
-	local page1 = Tap2:newpage()
-	
-	page1:Label("AutoFarm")
-	
-	page1:Toggle("AutoFarmLv",false,function(vu)
-	    _G.Auto_Farm = vu
-	end)
-
-function TP(P1)
-    Distance = (P1.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-    if Distance < 20 then
-        Speed = 250
-    elseif Distance < 300 then
-        Speed = 50
-    elseif Distance < 1000 then
-        Speed = 100
-    elseif Distance >= 1000 then
-        Speed = 500
-    end
-    game:GetService("TweenService"):Create(
-        game.Players.LocalPlayer.Character.HumanoidRootPart,
-        TweenInfo.new(Distance/Speed, Enum.EasingStyle.Linear),
-        {CFrame = P1}
-    ):Play()
+function Box()
+    game.StarterGui:SetCore("SendNotification", {
+    Title = "Liver Hub"; -- the title (ofc)
+    Text = "ลืมเลือก Unit ครับ"; -- what the text says (ofc)
+    Icon = ""; -- the image if u want. 
+    Duration = 3; -- how long the notification should in secounds
+    })
 end
 
-spawn(function()
-    while wait() do 
-    pcall(function()
-    if  _G.Auto_Farm == true or Clip == true or _G.FarmMasteryFruit == true or _G.BuddySword == true or _G.NoClip then
-    local Xd = Instance.new("Part")
-    Xd.Name = "xd"
-    Xd.Parent = game.Workspace
-    Xd.Anchored = true
-    Xd.Color = Color3.fromRGB(255, 155, 0)
-    Xd.Size = Vector3.new(15,0.5,15)
-    Xd.Material = "Neon"
-    Xd.Transparency = 1
-
-    if (game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.Position - game.Workspace["xd"].Position).Magnitude > 5 then
-        game.Workspace["xd"].CFrame = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.X,game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.Y - 3.1,game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.Z)
-    end
-else
-    if game:GetService("Workspace").xd then
-        game:GetService("Workspace").xd:Destroy()
-    end
-end
-    end)
-    end
-    end)
-
-spawn(function()
-        while game:GetService("RunService").Stepped:wait(5) do
-            character = game.Players.LocalPlayer.Character 
-            if _G.NoClip or _G.Auto_Farm or _G.Auto_Farm_Boss then
-                pcall(function()
-                    for _, v in pairs(character:GetChildren()) do
-                        pcall(function()
-                            if v:IsA("BasePart") then
-                                pcall(function()
-                                v.CanCollide = false
-                                end)
-                            end
-                        end)
-                    end
-                end)
-            end
-        end
+local PlaceID = game.PlaceId
+local AllIDs = {}
+local foundAnything = ""
+local actualHour = os.date("!*t").hour
+local Deleted = false
+local File = pcall(function()
+	AllIDs = game:GetService('HttpService'):JSONDecode(readfile("NotSameServers.json"))
 end)
+if not File then
+	table.insert(AllIDs, actualHour)
+	writefile("NotSameServers.json", game:GetService('HttpService'):JSONEncode(AllIDs))
+end
+function TPReturner()
+	local Site;
+	if foundAnything == "" then
+		Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'))
+	else
+		Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
+	end
+	local ID = ""
+	if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
+		foundAnything = Site.nextPageCursor
+	end
+	local num = 0;
+	for i,v in pairs(Site.data) do
+		local Possible = true
+		ID = tostring(v.id)
+		if tonumber(v.maxPlayers) > tonumber(v.playing) then
+			for _,Existing in pairs(AllIDs) do
+				if num ~= 0 then
+					if ID == tostring(Existing) then
+						Possible = false
+					end
+				else
+				if tonumber(actualHour) ~= tonumber(Existing) then
+					local delFile = pcall(function()
+						--delfile("NotSameServers.json")
+						AllIDs = {}
+						table.insert(AllIDs, actualHour)
+					end)
+				end
+			end
+			num = num + 1
+		end
+		if Possible == true then
+			table.insert(AllIDs, ID)
+			wait(0.2)
+			pcall(function()
+				--writefile("NotSameServers.json", game:GetService('HttpService'):JSONEncode(AllIDs))
+				wait(0.2)
+				game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, ID, game.Players.LocalPlayer)
+			end)
+			end
+		end
+	end
+end
+
+function Teleport()
+	while wait(0.2) do
+		pcall(function()
+			TPReturner()
+			if foundAnything ~= "" then
+				TPReturner()
+			end
+		end)
+	end
+end
+
+function HopLowerServer()
+	local maxplayers, gamelink, goodserver, data_table = math.huge, "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+	if not _G.FailedServerID then _G.FailedServerID = {} end
+	local function serversearch()
+		data_table = game:GetService"HttpService":JSONDecode(game:HttpGetAsync(gamelink))
+		for _, v in pairs(data_table.data) do
+			pcall(function()
+				if type(v) == "table" and v.id and v.playing and tonumber(maxplayers) > tonumber(v.playing) and not table.find(_G.FailedServerID, v.id) then
+					maxplayers = v.playing
+					goodserver = v.id
+				end
+			end)
+		end
+	end
+	function getservers()
+		pcall(serversearch)
+		for i, v in pairs(data_table) do
+			if i == "nextPageCursor" then
+				if gamelink:find"&cursor=" then
+					local a = gamelink:find"&cursor="
+					local b = gamelink:sub(a)
+					gamelink = gamelink:gsub(b, "")
+				end
+				gamelink = gamelink .. "&cursor=" .. v
+				pcall(getservers)
+			end
+		end
+	end
+	pcall(getservers)
+	if goodserver == game.JobId or maxplayers == #game:GetService"Players":GetChildren() - 1 then
+	end
+	table.insert(_G.FailedServerID, goodserver)
+	game:GetService"TeleportService":TeleportToPlaceInstance(game.PlaceId, goodserver)
+end
+
+----------------------------------------- Gui Go
+
 
 function CheckQuest()
     local Lv = game.Players.LocalPlayer.leaderstats.Level.Value
@@ -3808,11 +3828,330 @@ function CheckQuest()
     end
 end
 
+function CheckDun()
+    if _G.Dun == "Tree Village Arena" then
+        _G.PosMon = CFrame.new(2419.483154296875, 174.59156799316406, 2962.316650390625)
+    elseif _G.Dun == "Ninja War Battlefield Arena" then
+        _G.PosMon = CFrame.new(1958.003662109375, 164.19158935546875, 2242.4521484375)
+    elseif _G.Dun == "Shonin Exams Arena" then
+        _G.PosMon = CFrame.new(1531.6448974609375, 253.94956970214844, 3011.560546875)
+    elseif _G.Dun == "Bell Games Arena" then
+        _G.PosMon = CFrame.new(1553.6473388671875, 214.37437438964844, -1341.48876953125)
+    elseif _G.Dun == "Planet Niran Arena" then
+        _G.PosMon = CFrame.new(1360.251708984375, 215.8712921142578, -2551.1923828125)
+    elseif _G.Dun == "Power Tournament Arena" then
+        _G.PosMon = CFrame.new(2576.168701171875, 226.48655700683594, -1928.1883544921875)
+    elseif _G.Dun == "Dora City Arena" then
+        _G.PosMon = CFrame.new(6730.57275390625, 174.68841552734375, 220.08892822265625)
+    elseif _G.Dun == "Kimoyo Ward Arena" then
+        _G.PosMon = CFrame.new(6134.97412109375, 164.1680908203125, 667.257568359375)
+    elseif _G.Dun == "Sports Stadium Arena" then
+        _G.PosMon = CFrame.new(7093.54833984375, 221.96817016601562, 1070.5576171875)
+    end
+end
+
+function TP(P1)
+    Distance = (P1.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    if Distance < 20 then
+        Speed = 250
+    elseif Distance < 300 then
+        Speed = 50
+    elseif Distance < 1000 then
+        Speed = 100
+    elseif Distance >= 1000 then
+        Speed = 300
+    end
+    
+    game:GetService("TweenService"):Create(
+        game.Players.LocalPlayer.Character.HumanoidRootPart,
+        TweenInfo.new(Distance/Speed, Enum.EasingStyle.Linear),
+        {CFrame = P1}
+    ):Play()
+end
+
 spawn(function()
-    while wait() do
-        if _G.Auto_Farm then
+    while wait(.3) do 
+    pcall(function()
+    if  _G.Auto_Farm == true or Clip == true or _G.Auto_Farm_Dun then
+    local Xd = Instance.new("Part")
+    Xd.Name = "xd"
+    Xd.Parent = game.Workspace
+    Xd.Anchored = true
+    Xd.Color = Color3.fromRGB(255, 155, 0)
+    Xd.Size = Vector3.new(15,0.5,15)
+    Xd.Material = "Neon"
+    Xd.Transparency = 1
+
+    if (game:GetService('Players').LocalPlayer.Character.HumanoidRootPart.Position - game.Workspace["xd"].Position).Magnitude > 5 then
+        game.Workspace["xd"].CFrame = CFrame.new(game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.X,game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.Y - 3.1,game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame.Z)
+    end
+else
+    if game:GetService("Workspace").xd then
+        game:GetService("Workspace").xd:Destroy()
+    end
+end
+    end)
+    end
+end)
+	
+	local Window = create:Win("L I V E R - H U B    |    L A S T - P I R A T E ")
+	
+	local Tap2 = Window:Taps("Main")
+	local Tap3 = Window:Taps("Teleport")
+	local Tap4 = Window:Taps("Misc")
+    
+	local page1 = Tap2:newpage()
+	local page2 = Tap2:newpage()
+	local page3 = Tap2:newpage()
+	local Msc = Tap4:newpage()
+	local tel1 = Tap3:newpage()
+	
+	page1:Label("AutoFarm")
+	
+	page1:Toggle("AutoFarm Level",false,function(vu)
+	    _G.Auto_Farm = vu
+	end)
+	
+	
+	page1:Line()
+	
+	page1:Toggle("AutoFarm Dungeon",false,function(vu)
+	    _G.Auto_Farm_Dun = vu
+	end)
+	
+	local All_Dungeon = { "Tree Village Arena","Ninja War Battlefield Arena","Shonin Exams Arena","Bell Games Arena","Planet Niran Arena","Power Tournament Arena","Dora City Arena","Kimoyo Ward Arena","Sports Stadium Arena" }
+	
+	local Select_Dungeon = page1:Drop("Select Dungeon",false,All_Dungeon,function(Value)
+		_G.Dun = Value
+		print(_G.Dun)
+		if _G.Dun == "Tree Village Arena" or _G.Dun == "Ninja War Battlefield Arena" or _G.Dun == "Shonin Exams Arena" then
+		    _G.MAP = "Naturo Region"
+		elseif _G.Dun == "Bell Games Arena" or _G.Dun == "Planet Niran Arena" or _G.Dun == "Power Tournament Arena" then
+		    _G.MAP = "Dragon Region"
+		elseif _G.Dun == "Dora City Arena" or _G.Dun == "Kimoyo Ward Arena" or _G.Dun == "Sports Stadium Arena" then
+		    _G.MAP = "Hero Academy Region"
+		end
+		print(_G.MAP)
+		CheckDun()
+		print(_G.PosMon)
+	end)
+	
+	page1:Button("Refresh Dungeon",function()
+		Select_Dungeon:Clear()
+		wait(0.5)
+		for i,v in pairs(All_Dungeon) do
+		    Select_Dungeon:Add(v)
+		end
+	end)
+	
+	page2:Label("Setting Farm")
+	
+	page2:Toggle("NoClip",true,function(vu)
+	    _G.NoClip = vu
+	end)
+	
+	page2:Toggle("Auto Unit",false,function(vu)
+	    if _G.SelectUnit or _G.SelectUnit2 or _G.SelectUnit3 or _G.SelectUnit4 then
+	        _G.AutoUnit = vu
+	    else
+	        Box()
+	    end
+    end)
+    
+    page2:Line()
+    
+	page2:Toggle("Auto Skill X",false,function(vu)
+	    _G.Key_X = vu
+	end)
+	page2:Toggle("Auto Skill C",false,function(vu)
+	    _G.Key_C = vu
+	end)
+	page2:Toggle("Auto Skill V",false,function(vu)
+	    _G.Key_V = vu
+	end)
+	page2:Toggle("Auto Skill B",false,function(vu)
+	    _G.Key_B = vu
+	end)
+    
+    page3:TextBox("Select Unit 1","Name",function(vu)
+        _G.SelectUnit = vu
+    end)
+    page3:TextBox("Select Unit 2","Name",function(vu)
+        _G.SelectUnit2 = vu
+    end)
+    page3:TextBox("Select Unit 3","Name",function(vu)
+        _G.SelectUnit3 = vu
+    end)
+    page3:TextBox("Select Unit 4","Name",function(vu)
+        _G.SelectUnit4 = vu
+    end)
+	
+    tel1:Label("Teleport Map")
+	
+	tel1:Button("Tree Village Arena",function()
+	    Clip = true
+	    repeat wait()
+            TP(CFrame.new(2419.483154296875, 174.59156799316406, 2962.316650390625))
+        until (Vector3.new(2419.483154296875, 174.59156799316406, 2962.316650390625)-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 10 
+	    Clip = false
+	end)
+	tel1:Button("Ninja War Battlefield Arena",function()
+	    Clip = true
+	    repeat wait()
+            TP(CFrame.new(1958.003662109375, 164.19158935546875, 2242.4521484375))
+	    until (Vector3.new(1958.003662109375, 164.19158935546875, 2242.4521484375)-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 10 
+        Clip = false
+	end)
+	tel1:Button("Shonin Exams Arena",function()
+	    Clip = true
+	    repeat wait()
+            TP(CFrame.new(1531.6448974609375, 253.94956970214844, 3011.560546875))
+        until (Vector3.new(1531.6448974609375, 253.94956970214844, 3011.560546875)-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 10 
+	    Clip = false
+	end)
+	tel1:Line()
+	tel1:Button("Bell Games Arena",function()
+	    Clip = true
+	    repeat wait()
+            TP(CFrame.new(1553.6473388671875, 214.37437438964844, -1341.48876953125))
+        until (Vector3.new(1553.6473388671875, 214.37437438964844, -1341.48876953125)-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 10 
+	    Clip = false
+	end)
+	tel1:Button("Planet Niran Arena",function()
+	    Clip = true
+	    repeat wait()
+            TP(CFrame.new(1360.251708984375, 215.8712921142578, -2551.1923828125))
+        until (Vector3.new(1360.251708984375, 215.8712921142578, -2551.1923828125)-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 10 
+	    Clip = false
+	end)
+	tel1:Button("Power Tournament Arena",function()
+	    Clip = true
+	    repeat wait()
+            TP(CFrame.new(2576.168701171875, 226.48655700683594, -1928.1883544921875))
+        until (Vector3.new(2576.168701171875, 226.48655700683594, -1928.1883544921875)-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 10 
+	    Clip = false
+	end)
+	tel1:Line()
+	tel1:Button("Dora City Arena",function()
+	    Clip = true
+	    repeat wait()
+            TP(CFrame.new(6730.57275390625, 174.68841552734375, 220.08892822265625))
+        until (Vector3.new(6730.57275390625, 174.68841552734375, 220.08892822265625)-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 10 
+	    Clip = false
+	end)
+	tel1:Button("Kimoyo Ward Arena",function()
+	    Clip = true
+	    repeat wait()
+            TP(CFrame.new(6134.97412109375, 164.1680908203125, 667.257568359375))
+        until (Vector3.new(6134.97412109375, 164.1680908203125, 667.257568359375)-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 10 
+	    Clip = false
+	end)
+	tel1:Button("Sports Stadium Arena",function()
+	    Clip = true
+	    repeat wait()
+            TP(CFrame.new(7093.54833984375, 221.96817016601562, 1070.5576171875))
+        until (Vector3.new(7093.54833984375, 221.96817016601562, 1070.5576171875)-game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude <= 10 
+	    Clip = false
+	end)
+	
+	Msc:Label("Misc Server")
+	
+	Msc:Button("Hop Server",function()
+	    Teleport()
+	end)
+	Msc:Button("Hop LowerServer",function()
+	    HopLowerServer()
+	end)
+	Msc:Line()
+   
+	Msc:Button("Copy Link! Discord",function()
+	    setclipboard("https://discord.gg/ZbA7VSmUa4")
+	end)
+
+local vim = game:service("VirtualInputManager")
+local function hold(keyCode, time)
+    vim:SendKeyEvent(true, keyCode, false, game)
+    task.wait(time)
+    vim:SendKeyEvent(false, keyCode, false, game)
+end
+
+spawn(function()
+    while wait(5) do
+        if game:GetService("Players").LocalPlayer.PlayerGui.UI.HotbarArea.Hotbar.Health.ArenaJoiner.LeaveArena.Visible == false then
+            _G.KO = true
+        elseif game:GetService("Players").LocalPlayer.PlayerGui.UI.HotbarArea.Hotbar.Health.ArenaJoiner.JoinArena.Visible == false then
+            _G.KO = false
+            spawn(function()
+                while wait(3) do
+                    if _G.Key_X and _G.KO == false then
+                        hold(Enum.KeyCode.X, 1)
+                    end
+                end
+            end)
+            spawn(function()
+                while wait(3) do
+                    if _G.Key_C and _G.KO == false then
+                        hold(Enum.KeyCode.C, 1)
+                    end
+                end
+            end)
+            spawn(function()
+                while wait(3) do
+                    if _G.Key_V and _G.KO == false then
+                        hold(Enum.KeyCode.V, 1)
+                    end
+                end
+            end)
+            spawn(function()
+                while wait(3) do
+                    if _G.Key_B and _G.KO == false then
+                        hold(Enum.KeyCode.B, 1)
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+
+spawn(function()
+    while wait(0.5) do
+        if _G.AutoUnit then
+            game:GetService("ReplicatedStorage").Remotes.SpawnFighter:InvokeServer(_G.SelectUnit)
+            game:GetService("ReplicatedStorage").Remotes.SpawnFighter:InvokeServer(_G.SelectUnit2)
+            game:GetService("ReplicatedStorage").Remotes.SpawnFighter:InvokeServer(_G.SelectUnit3)
+            game:GetService("ReplicatedStorage").Remotes.SpawnFighter:InvokeServer(_G.SelectUnit4)
+        end
+    end
+end)
+
+spawn(function()
+        while game:GetService("RunService").Stepped:wait(5) do
+            character = game.Players.LocalPlayer.Character 
+            if _G.NoClip or _G.Auto_Farm or _G.Auto_Farm_Dun then
+                pcall(function()
+                    for _, v in pairs(character:GetChildren()) do
+                        pcall(function()
+                            if v:IsA("BasePart") then
+                                pcall(function()
+                                v.CanCollide = false
+                                end)
+                            end
+                        end)
+                    end
+                end)
+            end
+        end
+end)
+
+spawn(function()
+    while wait(.3) do
+        if _G.Auto_Farm or _G.Auto_Farm_Dun then
             if game:GetService("Players").LocalPlayer.PlayerGui.UI.HotbarArea.Hotbar.Health.ArenaJoiner.LeaveArena.Visible == false then
-                CheckQuest()
+                if _G.Auto_Farm_Dun then
+                elseif _G.Auto_Farm then
+                    CheckQuest()
+                end
                 wait(1)
                 repeat wait()
                     TP(_G.PosMon)
@@ -3823,9 +4162,9 @@ spawn(function()
                     for i,v in pairs(game:GetService("Workspace").WORLD[_G.MAP].Arenas[_G.Dun].Enemies:GetChildren()) do
                         pcall(function()
                             repeat game:GetService("RunService").Stepped:wait()
-                                TP(v.HumanoidRootPart.CFrame*CFrame.new(0,0,2))
+                                TP(v.HumanoidRootPart.CFrame*CFrame.new(0,0,4))
                                 game:GetService("ReplicatedStorage").Remotes.Melee:FireServer("Melee")
-                            until v.Humanoid.Health <= 0 or not v.Parent or _G.Auto_Farm == false
+                            until v.Humanoid.Health <= 0 or not v.Parent or _G.Auto_Farm == false or not v
                             wait(1.5)
                         end)
                     end
