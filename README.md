@@ -4164,7 +4164,7 @@ spawn(function()
                             repeat game:GetService("RunService").Stepped:wait()
                                 TP(v.HumanoidRootPart.CFrame*CFrame.new(0,0,4))
                                 game:GetService("ReplicatedStorage").Remotes.Melee:FireServer("Melee")
-                            until v.Humanoid.Health <= 0 or not v.Parent or _G.Auto_Farm == false or not v
+                            until v.Humanoid.Health <= 0 or not v.Parent or not v or _G.Auto_Farm == false and _G.Auto_Farm_Dun == false
                             wait(1.5)
                         end)
                     end
