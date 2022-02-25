@@ -3691,6 +3691,14 @@ function Box()
     Duration = 3; -- how long the notification should in secounds
     })
 end
+function Tev()
+    game.StarterGui:SetCore("SendNotification", {
+    Title = "Liver Hub"; -- the title (ofc)
+    Text = "ฟามมอนตัวนี้เร็วสุดแล้วงับ"; -- what the text says (ofc)
+    Icon = ""; -- the image if u want. 
+    Duration = 2; -- how long the notification should in secounds
+    })
+end
 
 local PlaceID = game.PlaceId
 local AllIDs = {}
@@ -3881,9 +3889,9 @@ function TP(P1)
 end
 
 spawn(function()
-    while wait(.3) do 
+    while wait(.1) do 
     pcall(function()
-    if  _G.Auto_Farm == true or Clip == true or _G.Auto_Farm_Dun then
+    if  _G.Auto_Farmo or Clip == true or _G.Auto_Farm_Dun or _G.Auto_Farm_Gem then
     local Xd = Instance.new("Part")
     Xd.Name = "xd"
     Xd.Parent = game.Workspace
@@ -3955,10 +3963,21 @@ end)
 		end
 	end)
 	
+	page1:Line()
+	
+	page1:Toggle("AutoFarm Gem",false,function(vu)
+	    _G.Auto_Farm_Gem = vu
+	    Tev()
+	end)
+	
 	page2:Label("Setting Farm")
 	
 	page2:Toggle("NoClip",true,function(vu)
 	    _G.NoClip = vu
+	end)
+	
+	page2:Toggle("Auto Collect",true,function(vu)
+	    _G.AutoCollect = vu
 	end)
 	
 	page2:Toggle("Auto Unit",false,function(vu)
@@ -4139,7 +4158,7 @@ end)
 spawn(function()
         while game:GetService("RunService").Stepped:wait(5) do
             character = game.Players.LocalPlayer.Character 
-            if _G.NoClip or _G.Auto_Farm or _G.Auto_Farm_Dun then
+            if _G.NoClip or _G.Auto_Farm or _G.Auto_Farm_Dun or _G.Auto_Farm_Gem then
                 pcall(function()
                     for _, v in pairs(character:GetChildren()) do
                         pcall(function()
@@ -4172,10 +4191,10 @@ spawn(function()
             elseif game:GetService("Players").LocalPlayer.PlayerGui.UI.HotbarArea.Hotbar.Health.ArenaJoiner.JoinArena.Visible == false then
                     for i,v in pairs(game:GetService("Workspace").WORLD[_G.MAP].Arenas[_G.Dun].Enemies:GetChildren()) do
                         pcall(function()
-                            repeat game:GetService("RunService").Stepped:wait()
+                            repeat game:GetService("RunService").Stepped:wait(0.3)
                                 TP(v.HumanoidRootPart.CFrame*CFrame.new(0,0,4))
                                 game:GetService("ReplicatedStorage").Remotes.Melee:FireServer("Melee")
-                            until v.Humanoid.Health <= 0 or not v.Parent or not v or _G.Auto_Farm == false and _G.Auto_Farm_Dun == false
+                            until v.Humanoid.Health <= 0 or not v.Parent or not v or _G.Auto_Farm == false and _G.Auto_Farm_Dun == false or _G.Auto_Farm == false and _G.Auto_Farm_Dun == nil or  _G.Auto_Farm == nil and _G.Auto_Farm_Dun == false
                             wait(1.5)
                         end)
                     end
@@ -4183,4 +4202,24 @@ spawn(function()
         end
     end
 end)
+
+spawn(function()
+    while wait(.3) do
+        if _G.Auto_Farm_Gem then -- HumanoidRootPart
+            for i,v in pairs(game:GetService("Workspace"):GetChildren()) do
+                if v.Name == "Samurai" then
+                    repeat game:GetService("RunService").Stepped:wait(0.3)
+                        TP(v.HumanoidRootPart.CFrame*CFrame.new(0,-5,0))
+                        game:GetService("ReplicatedStorage").Remotes.Melee:FireServer("Melee")
+                    until v.Humanoid.Health <= 0 or _G.Auto_Farm_Gem == false or not v or not v.Parent
+                    wait(1.5)
+                else
+                    TP(CFrame.new(2587.525390625, 166.47804260253906, 3267.5615234375))
+                end
+            end
+        end
+    end
+end)
+
+
 
